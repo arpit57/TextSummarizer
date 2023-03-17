@@ -8,6 +8,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.ensemble import RandomForestClassifier
 import streamlit as st
 import nltk
+import pickle
 
 
 # specify the URL of the news website to scrape
@@ -45,7 +46,9 @@ for link in article_links:
 
 
 # loading Spacy and Text input
-nlp = spacy.load('en_core_web_sm')
+# nlp = spacy.load('en_core_web_sm')
+nlp = pickle.load(open("save.p", "rb"))
+
 
 summaries = []
 percentages = []
