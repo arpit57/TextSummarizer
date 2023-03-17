@@ -7,7 +7,7 @@ import spacy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.ensemble import RandomForestClassifier
 import streamlit as st
-import nltk
+# import nltk
 import pickle
 
 
