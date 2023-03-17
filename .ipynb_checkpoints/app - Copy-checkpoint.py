@@ -7,7 +7,6 @@ import spacy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.ensemble import RandomForestClassifier
 import streamlit as st
-import nltk
 
 
 # specify the URL of the news website to scrape
@@ -73,41 +72,6 @@ for n, i in enumerate(l):
     # print(f"{summary} {len(summary)} / {len(l[n])} \n")
     summaries.append(summary)
     percentages.append(summary_percentage)
-
-
-# # download the punkt tokenizer if necessary
-# nltk.download('punkt')
-
-# # define a function for sentence tokenization
-# def sentence_tokenizer(text):
-#     sentences = nltk.sent_tokenize(text)
-#     return [sent.strip() for sent in sentences]
-
-# l = [...] # list of texts to summarize
-# summaries = []
-# percentages = []
-
-# for n, i in enumerate(l):
-#     text = i
-    
-#     # sentence tokenization
-#     sentences = sentence_tokenizer(text)
-    
-#     vectorizer = TfidfVectorizer(stop_words='english')
-#     X = vectorizer.fit_transform(sentences)
-    
-#     y = [1 if i < len(sentences)//2 else 0 for i in range(len(sentences))]  # label the first half of sentences as important
-#     clf = RandomForestClassifier()
-#     clf.fit(X, y)
-    
-#     important_indices = clf.predict(X).nonzero()[0]  # get the indices of the important sentences
-#     summary = ' '.join([sentences[i] for i in sorted(important_indices)])  # concatenate the important sentences into the summary
-#     summary_percentage = round(len(summary) / len(l[n]) *100, 1)
-
-#     summaries.append(summary)
-#     percentages.append(summary_percentage)
-
-
 
 
 st.title("Daily Tech stories summarizer")
