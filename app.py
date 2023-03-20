@@ -1,14 +1,13 @@
 
-# Imports
-
 import requests
 from bs4 import BeautifulSoup
-import spacy
+import streamlit as st
+import pickle
+import nltk
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.ensemble import RandomForestClassifier
-import streamlit as st
-# import nltk
-import pickle
+
+
 
 
 # specify the URL of the news website to scrape
@@ -44,23 +43,16 @@ for link in article_links:
 
 
 
-
-# loading Spacy and Text input
-# nlp = spacy.load('en_core_web_sm')
-nlp = pickle.load(open("save.p", "rb"))
-
-
 summaries = []
 percentages = []
 
+nltk.data.path.append('./nltk_data/') # set the path to the NLTK data directory
+# nltk.download('punkt', download_dir='./nltk_data/') # download the 'punkt' resource to the NLTK data directory
+
+
 for n, i in enumerate(l):
-    # print(type(i), len(i))
-    text = i
-    
-    doc = nlp(text)
-    
-    # sentence tokenization
-    sentences = [sent.text for sent in doc.sents]
+    # Split the paragraph into sentences
+    sentences = nltk.sent_tokenize(i)
     
     vectorizer = TfidfVectorizer(stop_words='english')
     X = vectorizer.fit_transform(sentences)
@@ -76,40 +68,6 @@ for n, i in enumerate(l):
     # print(f"{summary} {len(summary)} / {len(l[n])} \n")
     summaries.append(summary)
     percentages.append(summary_percentage)
-
-
-# # download the punkt tokenizer if necessary
-# nltk.download('punkt')
-
-# # define a function for sentence tokenization
-# def sentence_tokenizer(text):
-#     sentences = nltk.sent_tokenize(text)
-#     return [sent.strip() for sent in sentences]
-
-# l = [...] # list of texts to summarize
-# summaries = []
-# percentages = []
-
-# for n, i in enumerate(l):
-#     text = i
-    
-#     # sentence tokenization
-#     sentences = sentence_tokenizer(text)
-    
-#     vectorizer = TfidfVectorizer(stop_words='english')
-#     X = vectorizer.fit_transform(sentences)
-    
-#     y = [1 if i < len(sentences)//2 else 0 for i in range(len(sentences))]  # label the first half of sentences as important
-#     clf = RandomForestClassifier()
-#     clf.fit(X, y)
-    
-#     important_indices = clf.predict(X).nonzero()[0]  # get the indices of the important sentences
-#     summary = ' '.join([sentences[i] for i in sorted(important_indices)])  # concatenate the important sentences into the summary
-#     summary_percentage = round(len(summary) / len(l[n]) *100, 1)
-
-#     summaries.append(summary)
-#     percentages.append(summary_percentage)
-
 
 
 
