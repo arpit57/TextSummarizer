@@ -2,9 +2,14 @@
 import requests
 from bs4 import BeautifulSoup
 import streamlit as st
-from transformers import pipeline
+# from transformers import pipeline
 import re
-from streamlit.components.v1 import html
+# from streamlit.components.v1 import html
+# from sklearn.feature_extraction.text import TfidfVectorizer
+# from sklearn.ensemble import RandomForestClassifier
+# import nltk
+from transformers import T5ForConditionalGeneration, T5TokenizerFast
+
 
 
 # specify the URL of the news website to scrape
@@ -38,24 +43,60 @@ for link in article_links:
     article_text = article_soup.find("div", class_="clearfix").get_text()
     l.append(article_text)
 
-def get_first_thousand_words(text):
-    words = re.findall(r'\b\w+\b|[^\w\s]', text)
-    return ' '.join(words[:800])
+# def get_first_thousand_words(text):
+#     words = re.findall(r'\b\w+\b|[^\w\s]', text)
+#     return ' '.join(words[:800])
 
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+# summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+# summaries = []
+# for i in l:
+#     i = get_first_thousand_words(i)
+
+#     summaries.append(summarizer(i, max_length=300, min_length=100))
+
+# summariesText = [i[0]["summary_text"] for i in summaries]
+
+# summaries = []
+# percentages = []
+
+# nltk.data.path.append('./nltk_data/') # set the path to the NLTK data directory
+# # nltk.download('punkt', download_dir='./nltk_data/') # download the 'punkt' resource to the NLTK data directory
+
+# for n, i in enumerate(l):
+#     # Split the paragraph into sentences
+#     sentences = nltk.sent_tokenize(i)
+    
+#     vectorizer = TfidfVectorizer(stop_words='english')
+#     X = vectorizer.fit_transform(sentences)
+    
+#     y = [1 if i < len(sentences)//4 else 0 for i in range(len(sentences))]  # label the first half of sentences as important
+#     clf = RandomForestClassifier()
+#     clf.fit(X, y)
+    
+#     important_indices = clf.predict(X).nonzero()[0]  # get the indices of the important sentences
+#     summary = ' '.join([sentences[i] for i in sorted(important_indices)])  # concatenate the important sentences into the summary
+#     summary_percentage = round(len(summary) / len(l[n]) *100, 1)
+
+#     # print(f"{summary} {len(summary)} / {len(l[n])} \n")
+#     summaries.append(summary)
+#     percentages.append(summary_percentage)
+
+
+tokenizer = T5TokenizerFast.from_pretrained("t5-small", model_max_length=512)
+model = T5ForConditionalGeneration.from_pretrained("t5-small")
+
 summaries = []
-for i in l:
-    i = get_first_thousand_words(i)
 
-    summaries.append(summarizer(i, max_length=300, min_length=100))
-
-summariesText = [i[0]["summary_text"] for i in summaries]
-
-
+for n, i in enumerate(l):
+    inputs = tokenizer.encode("summarize: " + i, return_tensors="pt", max_length=512, truncation=True)
+    outputs = model.generate(inputs, max_length=150, min_length=40, length_penalty=2.0, num_beams=4, early_stopping=True)
+    summary = tokenizer.decode(outputs[0])
+    clean_summary = summary.replace('<pad> ', '').replace('</s>', '')
+    summaries.append(clean_summary)
 
 st.title("Live tech news summarizer")
 text = " Read full article here"
 
-for n, i in enumerate(summariesText):
+for n, i in enumerate(summaries):
     st.write(f"<div style='font-weight:normal'>{i}<a href='{links[n]}'>{text}</a></div><br>", unsafe_allow_html=True)
 
