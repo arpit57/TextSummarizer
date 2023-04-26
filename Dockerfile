@@ -1,12 +1,11 @@
-FROM python:3.8-slim-buster
+FROM python:3.8-slim
 
 WORKDIR /app
 
-COPY requirements.txt requirements.txt
-RUN pip3 install --no-cache-dir -r requirements.txt
+COPY requirements.txt ./requirements.txt
+RUN pip install -r requirements.txt
 
-COPY . .
+COPY app.py ./app.py
 
-EXPOSE 8501
 
-CMD ["streamlit", "run", "--server.port", "8501", "app.py"]
+CMD ["streamlit", "run", "app.py"]

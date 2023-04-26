@@ -1,7 +1,7 @@
 
 import requests
 from bs4 import BeautifulSoup
-import streamlit as st
+# import streamlit as st
 # from transformers import pipeline
 import re
 # from streamlit.components.v1 import html
@@ -9,6 +9,8 @@ import re
 # from sklearn.ensemble import RandomForestClassifier
 # import nltk
 from transformers import T5ForConditionalGeneration, T5TokenizerFast
+from flask import Flask, render_template
+
 
 
 
@@ -40,8 +42,12 @@ for link in article_links:
     article_soup = BeautifulSoup(article_response.content, "html.parser")
     
 #     # find the main text content of the article and print it
-    article_text = article_soup.find("div", class_="clearfix").get_text()
-    l.append(article_text)
+    article_text = article_soup.find_all("p", class_="duet--article--dangerously-set-cms-markup duet--article--standard-paragraph mb-20 font-fkroman text-18 leading-160 -tracking-1 selection:bg-franklin-20 dark:text-white dark:selection:bg-blurple [&_a]:shadow-underline-black dark:[&_a]:shadow-underline-white [&_a:hover]:shadow-highlight-franklin dark:[&_a:hover]:shadow-highlight-blurple")
+    paras = []
+    concatenated_text = ""
+    for para in article_text:
+        concatenated_text += para.text + " "
+    l.append(concatenated_text.rstrip(" "))
 
 # def get_first_thousand_words(text):
 #     words = re.findall(r'\b\w+\b|[^\w\s]', text)
@@ -94,9 +100,20 @@ for n, i in enumerate(l):
     clean_summary = summary.replace('<pad> ', '').replace('</s>', '')
     summaries.append(clean_summary)
 
-st.title("Live tech news summarizer")
-text = " Read full article here"
+# st.title("Live tech news summarizer")
+# text = " Read full article here"
 
-for n, i in enumerate(summaries):
-    st.write(f"<div style='font-weight:normal'>{i}<a href='{links[n]}'>{text}</a></div><br>", unsafe_allow_html=True)
+# for n, i in enumerate(summaries):
+#     st.write(f"<div style='font-weight:normal'>{i}<a href='{links[n]}'>{text}</a></div><br>", unsafe_allow_html=True)
 
+
+
+app = Flask(__name__)
+
+@app.route("/")
+def helloo():
+  return render_template("home.html", summariesAndLinks=zip(summaries, links))
+
+
+if __name__ == '__main__':
+  app.run(host='0.0.0.0', debug=True)
